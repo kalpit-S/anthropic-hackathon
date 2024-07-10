@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { fetchImageUrl, callLanguageModel } from "../utils/api";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Book, Calculator, Zap, Maximize2, X } from "lucide-react";
-import mermaid from "mermaid";
 
 const ExplorationTool = () => {
   const [query, setQuery] = useState("");

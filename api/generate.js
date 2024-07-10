@@ -66,12 +66,6 @@ export default async function handler(req, res) {
        - Prefer general concepts over specific diagrams (e.g., "water cycle" instead of "water cycle diagram").
        - Ensure the image query would provide visual support to enhance understanding of the topic.
     
-    4. Mermaid Diagram:
-       - If applicable, generate a Mermaid diagram code that visually represents a key concept, process, or relationship discussed in the current content.
-       - Choose the most appropriate diagram type (flowchart, sequence diagram, class diagram, etc.) for the concept.
-       - Keep the diagram simple and easy to understand, focusing on 3-7 key elements or steps.
-       - Use clear and concise labels for each element in the diagram.
-    
     Format your response as a JSON object with the following structure:
     {
       "html_content": "<div class='container mx-auto p-4'>... Your generated HTML content here ...</div>",
@@ -83,7 +77,6 @@ export default async function handler(req, res) {
         "Broader Question 2"
       ],
       "image_query": "Relevant image concept",
-      "mermaid_code": "mermaid code here but not required and be careful to make it so that it doesn't break the JSON structure"
     }
     
     Ensure that your response is a valid JSON object. Do not include any explanation or additional text outside of this JSON structure.
