@@ -1,8 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 
 const anthropic = new Anthropic({
-  apiKey:
-    "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",
+  apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
 export default async function handler(req, res) {
@@ -65,12 +64,7 @@ export default async function handler(req, res) {
        - Create a single image query related to the current content that is likely to have a corresponding Wikipedia page.
        - Prefer general concepts over specific diagrams (e.g., "water cycle" instead of "water cycle diagram").
        - Ensure the image query would provide visual support to enhance understanding of the topic.
-    
-    4. Mermaid Diagram:
-       - If applicable, generate a Mermaid diagram code that visually represents a key concept, process, or relationship discussed in the current content.
-       - Choose the most appropriate diagram type (flowchart, sequence diagram, class diagram, etc.) for the concept.
-       - Keep the diagram simple and easy to understand, focusing on 3-7 key elements or steps.
-       - Use clear and concise labels for each element in the diagram.
+  
     
     Format your response as a JSON object with the following structure:
     {
@@ -82,8 +76,7 @@ export default async function handler(req, res) {
         "Broader Question 1",
         "Broader Question 2"
       ],
-      "image_query": "Relevant image concept",
-      "mermaid_code": "mermaid code here but not required and be careful to make it so that it doesn't break the JSON structure"
+      "image_queries": ["Relevant image concept"]
     }
     
     Ensure that your response is a valid JSON object. Do not include any explanation or additional text outside of this JSON structure.
@@ -125,8 +118,7 @@ export default async function handler(req, res) {
         html_content:
           "<div class='container mx-auto p-4'>An error occurred while processing your request. Please try again.</div>",
         follow_up_questions: [],
-        image_query: [],
-        mermaid_code: "",
+        image_queries: [],
       });
     }
   } else {
