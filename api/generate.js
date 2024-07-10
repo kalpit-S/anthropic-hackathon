@@ -83,7 +83,7 @@ export default async function handler(req, res) {
         "Broader Question 2"
       ],
       "image_query": "Relevant image concept",
-      "mermaid_code": "graph TD\\nA[Start] --> B[Process]\\nB --> C[End]"
+      "mermaid_code": "mermaid code here but not required and be careful to make it so that it doesn't break the JSON structure"
     }
     
     Ensure that your response is a valid JSON object. Do not include any explanation or additional text outside of this JSON structure.
