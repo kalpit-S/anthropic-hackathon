@@ -33,10 +33,6 @@ const ExplorationTool = () => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [nodes, selectedNode]);
 
-  useEffect(() => {
-    mermaid.initialize({ startOnLoad: true });
-  }, []);
-
   const handleQuery = async (currentQuery) => {
     setLoading(true);
     setError(null);
@@ -59,7 +55,6 @@ const ExplorationTool = () => {
           content: response.html_content,
           followUpQuestions: response.follow_up_questions,
           imageUrl,
-          mermaidCode: response.mermaid_code,
         };
 
         setNodes([...nodes, newNode]);
@@ -92,14 +87,6 @@ const ExplorationTool = () => {
 
   const handleImageClick = (imageUrl) => {
     setModalImage(imageUrl);
-  };
-
-  const renderMermaidDiagram = (code) => {
-    const element = document.createElement("div");
-    mermaid.render("mermaid-diagram", code).then((result) => {
-      element.innerHTML = result.svg;
-    });
-    return element.innerHTML;
   };
 
   const NodeView = ({ nodes, selectedNode, onNodeClick }) => {
@@ -194,14 +181,6 @@ const ExplorationTool = () => {
                   className="prose max-w-none"
                   dangerouslySetInnerHTML={{ __html: selectedNode.content }}
                 />
-                {selectedNode.mermaidCode && (
-                  <div
-                    className="mt-4"
-                    dangerouslySetInnerHTML={{
-                      __html: renderMermaidDiagram(selectedNode.mermaidCode),
-                    }}
-                  />
-                )}
                 {selectedNode.imageUrl && (
                   <div className="relative mt-4 inline-block">
                     <img
