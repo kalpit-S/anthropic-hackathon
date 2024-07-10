@@ -53,20 +53,23 @@ export default async function handler(req, res) {
       Ensure that your response is a valid JSON object. Do not include any explanation or additional text outside of this JSON structure.
     `;
 
-    const messages = [
-      {
-        role: "user",
-        content: prompt,
-      },
-    ];
-
     try {
       const response = await anthropic.messages.create({
         model: "claude-3-5-sonnet-20240620",
-        max_tokens: 1500,
-        messages: messages,
+        max_tokens: 1000,
+        temperature: 0,
+        messages: [
+          {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: prompt,
+              },
+            ],
+          },
+        ],
       });
-
       if (
         !response.content ||
         !response.content[0] ||
