@@ -2,7 +2,6 @@ import Anthropic from "@anthropic-ai/sdk";
 const anthropic = new Anthropic({
   apiKey: process.env.REACT_APP_ANTHROPIC_API_KEY,
 });
-// const GROQ_API_KEY = process.env.REACT_APP_GROQ_API_KEY;
 
 // Simple rate limiting implementation
 const rateLimiter = (function () {

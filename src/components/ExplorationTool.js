@@ -1,16 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { fetchImageUrl, callLanguageModel } from "../utils/api";
-import { motion } from "framer-motion";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Search,
-  Book,
-  Calculator,
-  Zap,
-} from "lucide-react";
-import NodeView from "./NodeView";
-import NodeCardView from "./NodeCardView";
+import { motion, AnimatePresence } from "framer-motion";
+import { Search, Book, Calculator, Zap, Maximize2, X } from "lucide-react";
 
 const ExplorationTool = () => {
   const [query, setQuery] = useState("");
@@ -18,7 +9,28 @@ const ExplorationTool = () => {
   const [selectedNode, setSelectedNode] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [history, setHistory] = useState([]);
+  const [modalImage, setModalImage] = useState(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+        e.preventDefault();
+        const currentIndex = nodes.findIndex(
+          (node) => node.id === selectedNode?.id
+        );
+        let newIndex;
+        if (e.key === "ArrowLeft") {
+          newIndex = Math.max(0, currentIndex - 1);
+        } else {
+          newIndex = Math.min(nodes.length - 1, currentIndex + 1);
+        }
+        setSelectedNode(nodes[newIndex]);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [nodes, selectedNode]);
 
   const handleQuery = async (currentQuery) => {
     setLoading(true);
@@ -46,7 +58,6 @@ const ExplorationTool = () => {
 
         setNodes([...nodes, newNode]);
         setSelectedNode(newNode);
-        setHistory([...history, newNode.id]);
       }
     } catch (err) {
       setError(
@@ -67,22 +78,70 @@ const ExplorationTool = () => {
 
   const handleNodeClick = (node) => {
     setSelectedNode(node);
-    setHistory([...history, node.id]);
   };
 
   const handleFollowUpClick = async (question) => {
     await handleQuery(question);
   };
 
-  const handleNavigation = (direction) => {
-    const currentIndex = history.indexOf(selectedNode.id);
-    if (direction === "back" && currentIndex > 0) {
-      const prevNodeId = history[currentIndex - 1];
-      setSelectedNode(nodes.find((node) => node.id === prevNodeId));
-    } else if (direction === "forward" && currentIndex < history.length - 1) {
-      const nextNodeId = history[currentIndex + 1];
-      setSelectedNode(nodes.find((node) => node.id === nextNodeId));
-    }
+  const handleImageClick = (imageUrl) => {
+    setModalImage(imageUrl);
+  };
+
+  const NodeView = ({ nodes, selectedNode, onNodeClick }) => {
+    return (
+      <div className="flex space-x-2 mb-4 overflow-x-auto">
+        {nodes.map((node) => (
+          <button
+            key={node.id}
+            onClick={() => onNodeClick(node)}
+            className={`px-3 py-1 rounded whitespace-nowrap ${
+              selectedNode && selectedNode.id === node.id
+                ? "bg-blue-500 text-white"
+                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+            }`}
+          >
+            {node.title}
+          </button>
+        ))}
+      </div>
+    );
+  };
+
+  const ImageModal = ({ imageUrl, alt, isOpen, onClose }) => {
+    if (!isOpen) return null;
+
+    return (
+      <AnimatePresence>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={onClose}
+          className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4"
+        >
+          <motion.div
+            initial={{ scale: 0.8 }}
+            animate={{ scale: 1 }}
+            exit={{ scale: 0.8 }}
+            onClick={(e) => e.stopPropagation()}
+            className="relative bg-white rounded-lg overflow-hidden max-w-[90vw] max-h-[90vh] w-auto h-auto"
+          >
+            <button
+              onClick={onClose}
+              className="absolute top-2 right-2 text-white bg-black bg-opacity-50 rounded-full p-1 hover:bg-opacity-75 transition-all"
+            >
+              <X size={24} />
+            </button>
+            <img
+              src={imageUrl}
+              alt={alt}
+              className="w-auto h-auto max-w-full max-h-[calc(90vh-4rem)] object-contain"
+            />
+          </motion.div>
+        </motion.div>
+      </AnimatePresence>
+    );
   };
 
   return (
@@ -101,30 +160,6 @@ const ExplorationTool = () => {
         </header>
 
         <main className="p-6">
-          <div className="flex justify-between mb-6">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => handleNavigation("back")}
-              disabled={!selectedNode || history.indexOf(selectedNode.id) === 0}
-              className="px-4 py-2 bg-blue-500 text-white rounded-lg flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <ChevronLeft className="mr-2" /> Back
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => handleNavigation("forward")}
-              disabled={
-                !selectedNode ||
-                history.indexOf(selectedNode.id) === history.length - 1
-              }
-              className="px-4 py-2 bg-blue-500 text-white rounded-lg flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Forward <ChevronRight className="ml-2" />
-            </motion.button>
-          </div>
-
           {error && (
             <motion.div
               initial={{ opacity: 0 }}
@@ -146,11 +181,17 @@ const ExplorationTool = () => {
                   dangerouslySetInnerHTML={{ __html: selectedNode.content }}
                 />
                 {selectedNode.imageUrl && (
-                  <img
-                    src={selectedNode.imageUrl}
-                    alt={selectedNode.title}
-                    className="mt-4 rounded-lg shadow-md max-w-full h-auto"
-                  />
+                  <div className="relative mt-4 inline-block">
+                    <img
+                      src={selectedNode.imageUrl}
+                      alt={selectedNode.title}
+                      className="rounded-lg shadow-md max-w-full h-auto cursor-pointer transition-all hover:opacity-90"
+                      onClick={() => handleImageClick(selectedNode.imageUrl)}
+                    />
+                    <div className="absolute top-2 right-2 bg-black bg-opacity-50 text-white p-1 rounded-full">
+                      <Maximize2 size={16} />
+                    </div>
+                  </div>
                 )}
                 <h3 className="text-xl font-semibold mt-6 mb-3 flex items-center">
                   <Zap className="mr-2" /> Follow-up Questions:
@@ -181,23 +222,11 @@ const ExplorationTool = () => {
           </motion.div>
 
           <div className="bg-gray-100 p-4 rounded-lg">
-            <div className="flex space-x-2 mb-4 overflow-x-auto pb-2">
-              {nodes.map((node) => (
-                <motion.button
-                  key={node.id}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => handleNodeClick(node)}
-                  className={`px-3 py-1 rounded-full whitespace-nowrap ${
-                    selectedNode && selectedNode.id === node.id
-                      ? "bg-blue-500 text-white"
-                      : "bg-white text-gray-700 hover:bg-blue-100"
-                  }`}
-                >
-                  {node.title}
-                </motion.button>
-              ))}
-            </div>
+            <NodeView
+              nodes={nodes}
+              selectedNode={selectedNode}
+              onNodeClick={handleNodeClick}
+            />
             <form onSubmit={handleSubmit} className="flex">
               <input
                 type="text"
@@ -235,6 +264,12 @@ const ExplorationTool = () => {
           </div>
         </main>
       </motion.div>
+      <ImageModal
+        imageUrl={modalImage}
+        alt="Enlarged view"
+        isOpen={!!modalImage}
+        onClose={() => setModalImage(null)}
+      />
     </div>
   );
 };
