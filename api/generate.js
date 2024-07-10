@@ -42,16 +42,19 @@ export default async function handler(req, res) {
       - Create a single image query related to the current content that is likely to exist in the dictionary.
       - Ensure the query is general enough to have a corresponding Wikipedia page. For example instead of "water cycle diagram" use "water cycle".
 
+      4. Mermaid Diagram:
+      - If applicable, generate a Mermaid diagram code that visually helps explain a concept related to the current query.
+      - Use Mermaid syntax to create flowcharts, sequence diagrams, or other relevant diagram types.
+      - Keep the diagram simple and easy to understand, focusing on key concepts.
       Format your response as a JSON object with the following structure:
-
       {
         "html_content": "<div class='container mx-auto p-4'>... Your generated HTML content here ...</div>",
         "follow_up_questions": ["Question 1", "Question 2", "Question 3", ...],
-        "image_queries": ["Image query"]
+        "image_queries": ["Image query"],
+        "mermaid_code": "graph TD\\nA[Start] --> B[Process]\\nB --> C[End]"
       }
-
       Ensure that your response is a valid JSON object. Do not include any explanation or additional text outside of this JSON structure.
-    `;
+`;
 
     try {
       const response = await anthropic.messages.create({
