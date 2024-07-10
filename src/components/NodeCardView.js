@@ -1,6 +1,14 @@
-import React from "react";
+import React, { useEffect } from "react";
+import mermaid from "mermaid";
 
 const NodeCardView = ({ node, onFollowUpClick }) => {
+  useEffect(() => {
+    if (node.mermaidCode) {
+      mermaid.initialize({ startOnLoad: true });
+      mermaid.run();
+    }
+  }, [node.mermaidCode]);
+
   if (!node) return null;
 
   return (
@@ -16,6 +24,9 @@ const NodeCardView = ({ node, onFollowUpClick }) => {
           alt={node.title}
           className="mb-4 max-w-full h-auto"
         />
+      )}
+      {node.mermaidCode && (
+        <div className="mermaid mb-4">{node.mermaidCode}</div>
       )}
       <h3 className="text-xl font-semibold mb-2">Follow-up Questions:</h3>
       <ul className="list-disc pl-5">

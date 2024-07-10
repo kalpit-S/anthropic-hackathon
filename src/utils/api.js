@@ -45,7 +45,8 @@ export const callLanguageModel = async (query, context = {}) => {
       html_content:
         "<div class='container mx-auto p-4'>An error occurred while processing your request. Please try again.</div>",
       follow_up_questions: [],
-      image_queries: [],
+      image_query: [],
+      mermaid_code: "",
     };
   }
 };
